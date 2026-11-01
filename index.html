@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#071426">
+<title>Barcode Intelligence India</title>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<style>
+:root{--bg:#071426;--panel:#10233b;--panel2:#142b47;--text:#f3f7ff;--muted:#a8bad1;--accent:#29c7ff;--line:#27415e;--green:#55dfad}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#15385a 0,#071426 52%);font-family:Inter,Arial,sans-serif;color:var(--text);min-height:100vh}
+header{padding:22px max(5vw,20px);display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #ffffff16}
+.brand{font-size:20px;font-weight:800;letter-spacing:.2px}.brand span{color:var(--accent)}.badge{font-size:12px;color:var(--green);border:1px solid #55dfad66;padding:7px 11px;border-radius:30px}
+main{max-width:1080px;margin:48px auto;padding:0 20px}.hero{text-align:center;margin-bottom:30px}.eyebrow{color:var(--accent);font-weight:700;font-size:12px;letter-spacing:2px;text-transform:uppercase}
+h1{font-size:clamp(30px,5vw,48px);margin:12px 0}.hero p{color:var(--muted);max-width:680px;margin:auto;line-height:1.6}
+.searchbox{max-width:800px;margin:30px auto 18px;background:#ffffff0d;border:1px solid var(--line);padding:10px;border-radius:18px;display:flex;gap:8px;box-shadow:0 20px 60px #0003}
+input{min-width:0;flex:1;background:transparent;border:0;outline:0;color:white;padding:12px 14px;font-size:16px}input::placeholder{color:#8da3bd}
+button{border:0;border-radius:12px;background:var(--accent);color:#001526;font-weight:800;padding:13px 19px;cursor:pointer}button.secondary{background:#203b58;color:white;border:1px solid #365371}button:hover{filter:brightness(1.08)}
+.actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}.hint{text-align:center;color:var(--muted);font-size:12px;margin-top:12px}
+#reader{max-width:360px;margin:18px auto;display:none;border-radius:14px;overflow:hidden}
+#status{text-align:center;color:var(--muted);min-height:26px;margin:24px 0}
+.results{max-width:900px;margin:0 auto 60px}.card{background:linear-gradient(145deg,#142b47,#0d1f35);border:1px solid var(--line);border-radius:18px;padding:22px;margin:14px 0;box-shadow:0 14px 40px #0002}
+.product-head{display:flex;gap:20px;align-items:flex-start}.product-img{width:140px;height:140px;object-fit:contain;background:#fff;border-radius:12px;padding:8px;flex-shrink:0}.product-title{font-size:24px;margin:4px 0 8px}.muted{color:var(--muted);line-height:1.5}.tag{display:inline-block;background:#1d4664;color:#a9eaff;border:1px solid #2d6c91;padding:5px 9px;border-radius:30px;font-size:12px;margin:4px 4px 0 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-top:18px}.field{background:#091a2c;border:1px solid #203b58;border-radius:12px;padding:12px}.field b{display:block;color:#8faac6;font-size:11px;text-transform:uppercase;margin-bottom:6px}.field span{font-size:14px;overflow-wrap:anywhere}
+.section-title{font-size:16px;margin:22px 0 10px}.nutrition{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}.nutri{padding:10px;background:#091a2c;border-radius:10px}.nutri b{display:block;font-size:17px}.nutri small{color:var(--muted)}
+.product-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}.mini{cursor:pointer;text-align:left}.mini img{width:100%;height:130px;object-fit:contain;background:#fff;border-radius:10px}.mini h3{font-size:15px;margin:10px 0 5px}.mini p{font-size:12px;color:var(--muted)}
+.notice{font-size:12px;color:#9eb2c9;line-height:1.6;border-top:1px solid var(--line);padding-top:14px;margin-top:20px}
+footer{text-align:center;color:#7890aa;font-size:12px;padding:26px;border-top:1px solid #ffffff14}
+a{color:var(--accent)}@media(max-width:560px){header{padding:16px}.searchbox{flex-wrap:wrap}.searchbox input{flex-basis:100%}.searchbox button{flex:1}.product-head{flex-direction:column}.product-img{width:100%;height:180px}.product-title{font-size:21px}}
+</style>
+</head>
+<body>
+<header><div class="brand">BARCODE <span>INTELLIGENCE</span></div><div class="badge">INDIA • PRODUCT SEARCH</div></header>
+<main>
+<section class="hero">
+<div class="eyebrow">Scan • Search • Discover</div>
+<h1>Know what’s behind the barcode.</h1>
+<p>Look up packaged products by barcode or product name. Explore available ingredients, nutrition, brands and product details from an open product database.</p>
+</section>
+<div class="searchbox">
+<input id="query" placeholder="Enter barcode or product name (e.g. 8901234567890)" autocomplete="off">
+<button onclick="search()">Search</button>
+</div>
+<div class="actions">
+<button class="secondary" onclick="toggleScanner()">▣ Scan with camera</button>
+<button class="secondary" onclick="clearAll()">Clear results</button>
+</div>
+<div id="reader"></div>
+<div class="hint">Barcode lookup supports 8–14 digits • Product-name search supports 2–100 characters</div>
+<div id="status" role="status"></div>
+<section class="results" id="results"></section>
+</main>
+<footer>Barcode Intelligence India • Product records are supplied by Open Food Facts and may be incomplete or user-contributed.</footer>
+<script>
+const $=id=>document.getElementById(id);
+function setStatus(t){$('status').textContent=t}
+function esc(s){return String(s??'Not available').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+async function search(value){
+ const q=(value??$('query').value).trim(); if(!q){setStatus('Enter a barcode or product name.');return}
+ $('query').value=q; $('results').innerHTML='';setStatus('Searching product database…');
+ const isBarcode=/^\d{8,14}$/.test(q);
+ try{
+  const res=await fetch(isBarcode?`/api/barcode/${encodeURIComponent(q)}`:`/api/search?q=${encodeURIComponent(q)}`);
+  const data=await res.json();
+  if(!res.ok)throw new Error(data.detail||'Search failed.');
+  if(isBarcode){renderProduct(data.product);setStatus('Product record found.');}
+  else{
+   if(!data.products?.length){setStatus('No matching products found. Try another spelling or barcode.');return}
+   setStatus(`${data.count} matching product(s) found. Select a product for details.`);
+   $('results').innerHTML=`<div class="product-list">${data.products.map((p,i)=>`<div class="card mini" onclick='showSearchProduct(${i})'><img src="${esc(p.image||'')}" onerror="this.style.display='none'"><h3>${esc(p.name)}</h3><p>${esc(p.brand||'Brand not listed')} · ${esc(p.barcode||'Barcode unavailable')}</p></div>`).join('')}</div>`;
+   window.searchProducts=data.products;
+  }
+ }catch(e){setStatus(e.message)}
+}
+function showSearchProduct(i){renderProduct(window.searchProducts[i]);$('status').textContent='Showing available product details.'}
+function renderProduct(p){
+ const nutrients=p.nutrition_per_100g||{};
+ const nutrition=[['Energy',nutrients.energy_kcal,'kcal'],['Fat',nutrients.fat_g,'g'],['Saturated fat',nutrients.saturated_fat_g,'g'],['Carbohydrates',nutrients.carbohydrates_g,'g'],['Sugars',nutrients.sugars_g,'g'],['Protein',nutrients.proteins_g,'g'],['Salt',nutrients.salt_g,'g'],['Sodium',nutrients.sodium_mg,'mg']];
+ $('results').innerHTML=`<div class="card">
+ <div class="product-head">${p.image?`<img class="product-img" src="${esc(p.image)}" onerror="this.style.display='none'">`:''}
+ <div><div class="eyebrow">PRODUCT RECORD</div><h2 class="product-title">${esc(p.name)}</h2><div class="muted">${esc(p.brand||'Brand not listed')}</div><span class="tag">Barcode: ${esc(p.barcode)}</span>${p.quantity?`<span class="tag">${esc(p.quantity)}</span>`:''}<p class="muted">Source: ${esc(p.data_source)}</p></div></div>
+ <div class="grid">
+ ${[['Categories',p.categories],['Countries',p.country],['Allergens',p.allergens],['Labels',p.labels],['HSN code','Not provided by this database'],['GST rate','Not provided by this database'],['Live price','Not provided by this database']].map(([k,v])=>`<div class="field"><b>${esc(k)}</b><span>${esc(v)}</span></div>`).join('')}
+ </div>
+ <h3 class="section-title">Nutrition (per 100 g / 100 ml where available)</h3>
+ <div class="nutrition">${nutrition.map(([k,v,u])=>`<div class="nutri"><b>${v==null?'—':esc(v)+' '+u}</b><small>${k}</small></div>`).join('')}</div>
+ <h3 class="section-title">Ingredients</h3><p class="muted">${esc(p.ingredients)}</p>
+ <div class="actions" style="justify-content:flex-start;margin-top:18px">${p.source_url?`<a class="tag" href="${esc(p.source_url)}" target="_blank" rel="noopener">View source record ↗</a>`:''}${p.retailer_search?`<a class="tag" href="${esc(p.retailer_search)}" target="_blank" rel="noopener">Search retailer listings ↗</a>`:''}</div>
+ <div class="notice">Important: Product data can be incomplete, outdated or community-contributed. Always verify ingredients and allergen information on the physical package. Prices, GST and HSN classifications are not confirmed by this app; do not use this page as a tax or purchasing authority.</div>
+ </div>`;
+}
+let scanner=null;
+async function toggleScanner(){
+ const box=$('reader');
+ if(scanner){try{await scanner.stop()}catch(e){}scanner=null;box.style.display='none';return}
+ if(!window.Html5Qrcode){setStatus('Camera scanner library could not load. Check your internet connection.');return}
+ box.style.display='block';
+ scanner=new Html5Qrcode('reader');
+ try{
+  await scanner.start({facingMode:'environment'},{fps:10,qrbox:{width:250,height:140}},async text=>{
+   $('query').value=text;
+   await scanner.stop();scanner=null;box.style.display='none';search(text);
+  },()=>{});
+  setStatus('Point your camera at a product barcode. Allow camera access when prompted.');
+ }catch(e){scanner=null;box.style.display='none';setStatus('Could not start camera. Use HTTPS and allow camera permission, or enter the barcode manually.')}
+}
+function clearAll(){$('results').innerHTML='';$('query').value='';setStatus('')}
+$('query').addEventListener('keydown',e=>{if(e.key==='Enter')search()});
+</script>
+</body></html>

@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: barcode-intelligence-india
+    runtime: docker
+    plan: free
+    healthCheckPath: /api/health
+    autoDeploy: true
